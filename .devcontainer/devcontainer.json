@@ -1,0 +1,34 @@
+{
+  "name": "otel-demo-cohort",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb",
+    "storage": "64gb"
+  },
+
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  "forwardPorts": [8080, 3000, 16686, 9090],
+
+  "portsAttributes": {
+    "8080": { "label": "frontend-proxy", "onAutoForward": "notify" },
+    "3000": { "label": "grafana", "onAutoForward": "silent" },
+    "16686": { "label": "jaeger", "onAutoForward": "silent" },
+    "9090": { "label": "prometheus", "onAutoForward": "silent" }
+  },
+
+  "postCreateCommand": "docker compose -f compose.yaml -f compose.observability.yaml pull",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  }
+}
