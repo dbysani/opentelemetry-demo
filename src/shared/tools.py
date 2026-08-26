@@ -96,6 +96,31 @@ async def get_product(product_id: str):
         return f"Error while fetching product {product_id}: {e}"
 
 
+async def find_products_under_budget(budget: float):
+    """Find products costing no more than `budget` US dollars, cheapest first.
+    Returns the id, name and price_usd of each match, or an empty list when
+    nothing is affordable."""
+    if budget <= 0:
+        return f"Error: budget must be greater than 0, got {budget}"
+    products = await list_products()
+    if isinstance(products, str):
+        return products
+    # Money is units plus nanos at 10^-9. Compare in whole nanos so a price that
+    # sits exactly on the budget is never excluded by float rounding.
+    budget_nanos = round(budget * 1_000_000_000)
+    affordable = [
+        {
+            "id": product["id"],
+            "name": product["name"],
+            "price_usd": product["priceUsd"]["units"] + product["priceUsd"]["nanos"] / 1e9,
+        }
+        for product in products
+        if product["priceUsd"]["units"] * 1_000_000_000 + product["priceUsd"]["nanos"]
+        <= budget_nanos
+    ]
+    return sorted(affordable, key=lambda product: product["price_usd"])
+
+
 async def checkout(checkout_person):
     """Checkout the user's cart and create an order.
     Takes request in the format {string user_id, string userCurrency, Address address, string email, CreditCardInfo creditCard}

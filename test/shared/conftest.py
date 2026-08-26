@@ -19,6 +19,8 @@ from pathlib import Path
 import httpx
 import pytest
 
+from responses import PRODUCTS
+
 # The tools are deployed by copying src/shared/tools.py next to the importing
 # code (src/mcp/Dockerfile and src/agent/Dockerfile both do this), so they are
 # imported as a top-level `tools` module rather than a package. Mirror that here.
@@ -80,3 +82,16 @@ def mock_transport(monkeypatch):
         return requests_seen
 
     return install
+
+
+@pytest.fixture
+def patch_catalog(mock_transport):
+    """Serve the recorded catalog to any tool that reaches /api/products."""
+    return mock_transport(json_response(PRODUCTS))
+
+
+@pytest.fixture
+def patch_catalog_failure(mock_transport):
+    """Fail the catalog request at the transport, so the tool takes its
+    except branch and returns an error string."""
+    return mock_transport(connection_error("connection refused"))

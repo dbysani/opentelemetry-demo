@@ -33,6 +33,7 @@ class AstronomyShopMcp:
         self.mcp.tool("get_shipping_quote")(tools.get_shipping_quote)
         self.mcp.tool("get_supported_currencies")(tools.get_supported_currencies)
         self.mcp.tool("list_products")(tools.list_products)
+        self.mcp.tool("find_products_under_budget")(tools.find_products_under_budget)
 
     def run(self):
         """Start the MCP server using http stream transport."""
